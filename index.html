@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Data Graph</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f9; 
+            padding: 20px;
+        }
+        h2 {
+            color: #333; 
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        canvas {
+            max-width: 600px;
+            margin: auto;
+            background-color: #fff; 
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+        }
+    </style>
+</head>
+<body>
+    <h2>Temperature & Humidity Graph</h2>
+    <canvas id="tempChart"></canvas>
+    <canvas id="humidityChart"></canvas>
+
+    <script>
+        async function fetchData() {
+            try {
+                const response = await fetch("/data");
+                const data = await response.json();
+                return data.reverse();  
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                return [];
+            }
+        }
+
+        async function drawCharts() {
+            const data = await fetchData();
+
+            const timestamps = data.map(d => new Date(d.timestamp).toLocaleTimeString());
+            const temperatures = data.map(d => d.temperature);
+            const humidity = data.map(d => d.humidity);
+
+            new Chart(document.getElementById("tempChart"), {
+                type: "line",
+                data: {
+                    labels: timestamps,
+                    datasets: [{
+                        label: "Temperature (°C)",
+                        data: temperatures,
+                        borderColor: "#FFB6B6", /* Soft pinkish color */
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.4, /* Slight curve for a smooth effect */
+                        pointRadius: 3, /* Smaller points */
+                        pointBackgroundColor: "#FFB6B6",
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                font: {
+                                    size: 12,
+                                    family: 'Arial, sans-serif',
+                                    weight: 'normal'
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: "rgba(200, 200, 200, 0.3)" /* Soft grid lines */
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: "rgba(200, 200, 200, 0.3)" /* Soft grid lines */
+                            },
+                            ticks: {
+                                font: {
+                                    size: 12,
+                                    family: 'Arial, sans-serif'
+                                },
+                                color: "#777" /* Subtle tick marks */
+                            }
+                        }
+                    }
+                }
+            });
+
+            new Chart(document.getElementById("humidityChart"), {
+                type: "line",
+                data: {
+                    labels: timestamps,
+                    datasets: [{
+                        label: "Humidity (%)",
+                        data: humidity,
+                        borderColor: "#B6E3FF", /* Soft blue color */
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.4,
+                        pointRadius: 3,
+                        pointBackgroundColor: "#B6E3FF",
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                font: {
+                                    size: 12,
+                                    family: 'Arial, sans-serif',
+                                    weight: 'normal'
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: "rgba(200, 200, 200, 0.3)"
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: "rgba(200, 200, 200, 0.3)"
+                            },
+                            ticks: {
+                                font: {
+                                    size: 12,
+                                    family: 'Arial, sans-serif'
+                                },
+                                color: "#777"
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        drawCharts();
+        setInterval(drawCharts, 5000); // Refresh every 5 seconds
+    </script>
+</body>
+</html>
